@@ -12,14 +12,14 @@ const seedDatabase = async () => {
     // Sample jokes for each theme
     const sampleJokes = {
       'humor negro': [
-        '¿Por qué los fantasmas no mienten? Porque se les ve la cara.',
+        '¿Soy guapa, cariño?". "¡Eres como el Sol! Duele mirarte.',
         '¿Qué le dice un sepulturero a otro? ¿Te gusta mi trabajo? Es la muerte.',
-        '¿Cuál es el colmo de un muerto? Que lo entierren vivo.'
+        'Mi esposa lleva desaparecida durante dos semanas. La policía dijo que debía prepararme para lo peor. Así que le dije a mi nueva novia que era mejor que se fuera de casa',
       ],
       'humor amarillo': [
         '¿Por qué los pájaros vuelan hacia el sur en invierno? Porque caminando tardarían mucho más.',
         '¿Qué hace un pez? Nada.',
-        '¿Cuál es el café más malo del mundo? El exprés.'
+        '¿Cuál es el café más malo del mundo? El que le pega a los cafes buenos.'
       ],
       'chistes verdes': [
         '¿Qué le dice un semáforo a otro? No me mires, me estoy cambiando.',

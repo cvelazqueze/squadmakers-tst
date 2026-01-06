@@ -57,9 +57,22 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal server error' });
 });
 
-// 404 handler
+// 404 handler - must be last
 app.use((req, res) => {
-  res.status(404).json({ error: 'Endpoint not found' });
+  logger.warn(`404 - Endpoint not found: ${req.method} ${req.path}`);
+  res.status(404).json({ 
+    error: 'Endpoint not found',
+    path: req.path,
+    method: req.method,
+    availableEndpoints: {
+      jokes: '/chistes',
+      math: '/matematico',
+      queries: '/consultas',
+      users: '/usuarios',
+      themes: '/tematicas',
+      health: '/health'
+    }
+  });
 });
 
 module.exports = app;

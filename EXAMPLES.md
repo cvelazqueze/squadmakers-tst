@@ -150,10 +150,22 @@ curl "http://localhost:3000/matematico?number=5"
 
 ## Endpoints de Consultas SQL
 
-### 1. Chistes de Manolito
+### Consulta 1: Todos los chistes de un usuario
+
+Obtiene todos los chistes creados por un usuario específico usando el parámetro `user_name`.
 
 ```bash
-curl http://localhost:3000/consultas/manolito
+# Chistes de Manolito
+curl "http://localhost:3000/consultas?user_name=Manolito"
+
+# Chistes de Pepe
+curl "http://localhost:3000/consultas?user_name=Pepe"
+
+# Chistes de Isabel
+curl "http://localhost:3000/consultas?user_name=Isabel"
+
+# Chistes de Pedro
+curl "http://localhost:3000/consultas?user_name=Pedro"
 ```
 
 **Respuesta esperada:**
@@ -174,10 +186,24 @@ curl http://localhost:3000/consultas/manolito
 }
 ```
 
-### 2. Chistes de temática "humor negro"
+### Consulta 2: Todos los chistes de una temática
+
+Obtiene todos los chistes de una temática específica usando el parámetro `theme_name`.
 
 ```bash
-curl http://localhost:3000/consultas/humor-negro
+# Chistes de humor negro
+curl "http://localhost:3000/consultas?theme_name=humor negro"
+
+# Chistes de humor amarillo
+curl "http://localhost:3000/consultas?theme_name=humor amarillo"
+
+# Chistes verdes
+curl "http://localhost:3000/consultas?theme_name=chistes verdes"
+```
+
+**Nota:** Los espacios en los nombres de temáticas se manejan automáticamente. Usa comillas en la URL o codifica los espacios como `%20`:
+```bash
+curl "http://localhost:3000/consultas?theme_name=humor%20negro"
 ```
 
 **Respuesta esperada:**
@@ -193,15 +219,24 @@ curl http://localhost:3000/consultas/humor-negro
       "user_name": "Manolito",
       "theme_name": "humor negro"
     }
-    // ... más chistes
+    // ... más chistes de todos los usuarios
   ]
 }
 ```
 
-### 3. Chistes de Manolito con temática "humor negro"
+### Consulta 3: Chistes de un usuario con una temática específica
+
+Obtiene todos los chistes de un usuario específico con una temática específica usando ambos parámetros.
 
 ```bash
-curl http://localhost:3000/consultas/manolito/humor-negro
+# Chistes de Manolito con temática humor negro
+curl "http://localhost:3000/consultas?user_name=Manolito&theme_name=humor negro"
+
+# Chistes de Pepe con temática humor amarillo
+curl "http://localhost:3000/consultas?user_name=Pepe&theme_name=humor amarillo"
+
+# Chistes de Isabel con temática chistes verdes
+curl "http://localhost:3000/consultas?user_name=Isabel&theme_name=chistes verdes"
 ```
 
 **Respuesta esperada:**
@@ -221,6 +256,21 @@ curl http://localhost:3000/consultas/manolito/humor-negro
     // ... 2 más
   ]
 }
+```
+
+### Rutas Legacy (Compatibilidad)
+
+Las siguientes rutas siguen funcionando pero están deprecadas:
+
+```bash
+# Deprecated: Usa /consultas?user_name=Manolito
+curl http://localhost:3000/consultas/manolito
+
+# Deprecated: Usa /consultas?theme_name=humor negro
+curl http://localhost:3000/consultas/humor-negro
+
+# Deprecated: Usa /consultas?user_name=Manolito&theme_name=humor negro
+curl http://localhost:3000/consultas/manolito/humor-negro
 ```
 
 ## Endpoints de Usuarios

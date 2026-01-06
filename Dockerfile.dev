@@ -1,0 +1,31 @@
+# Development Dockerfile with hot reload support
+FROM node:18-alpine
+
+# Install build dependencies for native modules (sqlite3) and curl for healthcheck
+RUN apk add --no-cache python3 make g++ curl
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install all dependencies (including dev dependencies for nodemon)
+RUN npm ci
+
+# Create directory for database
+RUN mkdir -p /app/database
+
+# Create directory for logs
+RUN mkdir -p /app/logs
+
+# Expose port
+EXPOSE 3000
+
+# Set environment variables
+ENV NODE_ENV=development
+ENV PORT=3000
+ENV DB_PATH=/app/database/jokes.db
+
+# Start the application with nodemon for hot reload
+CMD ["npm", "run", "dev"]

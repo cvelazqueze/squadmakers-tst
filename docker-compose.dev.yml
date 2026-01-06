@@ -4,21 +4,25 @@ services:
   api:
     build:
       context: .
-      dockerfile: Dockerfile
-      # Always rebuild when starting
-      pull: true
-    container_name: squadmakers-api
+      dockerfile: Dockerfile.dev
+    container_name: squadmakers-api-dev
     ports:
       - "3000:3000"
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
       - PORT=3000
       - DB_PATH=/app/database/jokes.db
     volumes:
+      # Mount source code for hot reload
+      - ./src:/app/src
+      - ./package.json:/app/package.json
+      - ./package-lock.json:/app/package-lock.json
       # Persist database data
       - ./database:/app/database
-      # Optional: persist logs
+      # Persist logs
       - ./logs:/app/logs
+      # Exclude node_modules from host
+      - /app/node_modules
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
@@ -26,3 +30,4 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+    command: npm run dev

@@ -27,16 +27,41 @@ git clone https://github.com/cvelazqueze/squadmakers-tst
 cd squadmakers
 ```
 
-2. Construye y ejecuta el contenedor:
+2. **Modo Desarrollo (con Hot Reload - Recomendado para desarrollo):**
 ```bash
-docker-compose up -d
+docker-compose -f docker-compose.dev.yml up -d --build
+```
+Los cambios en el código se reflejarán automáticamente sin necesidad de reconstruir.
+
+3. **Modo Producción:**
+```bash
+docker-compose up -d --build
 ```
 
 El servidor estará disponible en `http://localhost:3000`
 
 #### Comandos útiles de Docker
 
+**Modo Desarrollo:**
 ```bash
+# Iniciar con hot reload
+docker-compose -f docker-compose.dev.yml up -d --build
+
+# Ver logs del contenedor
+docker-compose -f docker-compose.dev.yml logs -f
+
+# Detener el contenedor
+docker-compose -f docker-compose.dev.yml down
+
+# Reiniciar el contenedor
+docker-compose -f docker-compose.dev.yml restart
+```
+
+**Modo Producción:**
+```bash
+# Iniciar (siempre reconstruye)
+docker-compose up -d --build
+
 # Ver logs del contenedor
 docker-compose logs -f
 
@@ -47,7 +72,7 @@ docker-compose down
 docker-compose down -v
 
 # Reconstruir la imagen
-docker-compose build
+docker-compose build --no-cache
 
 # Reiniciar el contenedor
 docker-compose restart
@@ -241,27 +266,114 @@ curl http://localhost:3000/matematico?number=5
 
 ### Consultas SQL
 
-#### GET /consultas/manolito
-Obtiene todos los chistes creados por el usuario "Manolito".
+#### GET /consultas?user_name=...&theme_name=...
+Obtiene chistes usando query parameters. Puedes usar `user_name`, `theme_name`, o ambos.
 
-**Ejemplo:**
+**Consulta 1: Todos los chistes de un usuario**
 ```bash
+# Chistes de Manolito
+curl "http://localhost:3000/consultas?user_name=Manolito"
+
+# Chistes de Pepe
+curl "http://localhost:3000/consultas?user_name=Pepe"
+
+# Chistes de Isabel
+curl "http://localhost:3000/consultas?user_name=Isabel"
+
+# Chistes de Pedro
+curl "http://localhost:3000/consultas?user_name=Pedro"
+```
+
+**Respuesta:**
+```json
+{
+  "user": "Manolito",
+  "count": 9,
+  "jokes": [
+    {
+      "id": 1,
+      "text": "¿Por qué los fantasmas no mienten? Porque se les ve la cara.",
+      "created_at": "2024-01-01 12:00:00",
+      "user_name": "Manolito",
+      "theme_name": "humor negro"
+    }
+  ]
+}
+```
+
+**Consulta 2: Todos los chistes de una temática**
+```bash
+# Chistes de humor negro
+curl "http://localhost:3000/consultas?theme_name=humor negro"
+
+# Chistes de humor amarillo
+curl "http://localhost:3000/consultas?theme_name=humor amarillo"
+
+# Chistes verdes
+curl "http://localhost:3000/consultas?theme_name=chistes verdes"
+```
+
+**Respuesta:**
+```json
+{
+  "theme": "humor negro",
+  "count": 12,
+  "jokes": [
+    {
+      "id": 1,
+      "text": "¿Por qué los fantasmas no mienten? Porque se les ve la cara.",
+      "created_at": "2024-01-01 12:00:00",
+      "user_name": "Manolito",
+      "theme_name": "humor negro"
+    }
+  ]
+}
+```
+
+**Consulta 3: Chistes de un usuario con una temática específica**
+```bash
+# Chistes de Manolito con temática humor negro
+curl "http://localhost:3000/consultas?user_name=Manolito&theme_name=humor negro"
+
+# Chistes de Pepe con temática humor amarillo
+curl "http://localhost:3000/consultas?user_name=Pepe&theme_name=humor amarillo"
+
+# Chistes de Isabel con temática chistes verdes
+curl "http://localhost:3000/consultas?user_name=Isabel&theme_name=chistes verdes"
+```
+
+**Respuesta:**
+```json
+{
+  "user": "Manolito",
+  "theme": "humor negro",
+  "count": 3,
+  "jokes": [
+    {
+      "id": 1,
+      "text": "¿Por qué los fantasmas no mienten? Porque se les ve la cara.",
+      "created_at": "2024-01-01 12:00:00",
+      "user_name": "Manolito",
+      "theme_name": "humor negro"
+    }
+  ]
+}
+```
+
+**Nota:** Los espacios en los nombres de temáticas se manejan automáticamente. Usa comillas en la URL o codifica los espacios como `%20`.
+
+#### Rutas Legacy (Compatibilidad hacia atrás)
+
+Las siguientes rutas siguen funcionando pero están deprecadas:
+
+```bash
+# Deprecated: Usa /consultas?user_name=Manolito
 curl http://localhost:3000/consultas/manolito
-```
 
-#### GET /consultas/humor-negro
-Obtiene todos los chistes de la temática "humor negro".
-
-**Ejemplo:**
-```bash
+# Deprecated: Usa /consultas?theme_name=humor negro
 curl http://localhost:3000/consultas/humor-negro
-```
 
-#### GET /consultas/manolito/humor-negro
-Obtiene todos los chistes de "Manolito" con temática "humor negro".
-
-**Ejemplo:**
-```bash
+# Deprecated: Usa /consultas?user_name=Manolito&theme_name=humor negro
 curl http://localhost:3000/consultas/manolito/humor-negro
 ```
 

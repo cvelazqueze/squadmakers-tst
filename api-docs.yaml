@@ -296,10 +296,89 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /consultas:
+    get:
+      summary: Get jokes by query parameters
+      description: Returns jokes filtered by user_name, theme_name, or both. At least one parameter is required.
+      parameters:
+        - name: user_name
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Name of the user to filter by
+          example: "Manolito"
+        - name: theme_name
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Name of the theme to filter by (spaces are handled automatically)
+          example: "humor negro"
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      user:
+                        type: string
+                        example: "Manolito"
+                      count:
+                        type: integer
+                        example: 9
+                      jokes:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Joke'
+                  - type: object
+                    properties:
+                      theme:
+                        type: string
+                        example: "humor negro"
+                      count:
+                        type: integer
+                        example: 12
+                      jokes:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Joke'
+                  - type: object
+                    properties:
+                      user:
+                        type: string
+                        example: "Manolito"
+                      theme:
+                        type: string
+                        example: "humor negro"
+                      count:
+                        type: integer
+                        example: 3
+                      jokes:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Joke'
+        '400':
+          description: Invalid request (no parameters provided)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /consultas/manolito:
     get:
-      summary: Get all jokes by Manolito
-      description: Returns all jokes created by the user "Manolito"
+      summary: Get all jokes by Manolito (Legacy)
+      description: Returns all jokes created by the user "Manolito". This endpoint is deprecated. Use /consultas/usuario/Manolito instead.
+      deprecated: true
       responses:
         '200':
           description: Successful response
@@ -321,8 +400,9 @@ paths:
 
   /consultas/humor-negro:
     get:
-      summary: Get all jokes of theme "humor negro"
-      description: Returns all jokes with the theme "humor negro"
+      summary: Get all jokes of theme "humor negro" (Legacy)
+      description: Returns all jokes with the theme "humor negro". This endpoint is deprecated. Use /consultas/tematica/humor-negro instead.
+      deprecated: true
       responses:
         '200':
           description: Successful response
@@ -344,8 +424,9 @@ paths:
 
   /consultas/manolito/humor-negro:
     get:
-      summary: Get jokes by Manolito and theme "humor negro"
-      description: Returns all jokes created by "Manolito" with the theme "humor negro"
+      summary: Get jokes by Manolito and theme "humor negro" (Legacy)
+      description: Returns all jokes created by "Manolito" with the theme "humor negro". This endpoint is deprecated. Use /consultas/usuario/Manolito/tematica/humor-negro instead.
+      deprecated: true
       responses:
         '200':
           description: Successful response

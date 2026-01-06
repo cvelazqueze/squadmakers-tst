@@ -15,9 +15,39 @@ docker-compose --version
 
 ## Inicio Rápido
 
+### Modo Desarrollo (con Hot Reload)
+
+Para desarrollo con recarga automática al guardar cambios:
+
+1. **Construir y ejecutar el contenedor en modo desarrollo:**
+```bash
+docker-compose -f docker-compose.dev.yml up -d --build
+```
+
+2. **Ver logs en tiempo real:**
+```bash
+docker-compose -f docker-compose.dev.yml logs -f
+```
+
+3. **Verificar que el contenedor está corriendo:**
+```bash
+docker-compose -f docker-compose.dev.yml ps
+```
+
+4. **Probar el endpoint de health:**
+```bash
+curl http://localhost:3000/health
+```
+
+¡Listo! La API está disponible en `http://localhost:3000` y se recargará automáticamente al guardar cambios.
+
+### Modo Producción
+
+Para producción (siempre reconstruye la imagen):
+
 1. **Construir y ejecutar el contenedor:**
 ```bash
-docker-compose up -d
+docker-compose up -d --build
 ```
 
 2. **Verificar que el contenedor está corriendo:**
@@ -34,14 +64,36 @@ curl http://localhost:3000/health
 
 ## Comandos Útiles
 
-### Gestión del Contenedor
+### Modo Desarrollo
 
 ```bash
-# Iniciar el contenedor en segundo plano
-docker-compose up -d
+# Iniciar el contenedor en modo desarrollo (con hot reload)
+docker-compose -f docker-compose.dev.yml up -d --build
+
+# Iniciar y ver logs en tiempo real
+docker-compose -f docker-compose.dev.yml up
+
+# Detener el contenedor de desarrollo
+docker-compose -f docker-compose.dev.yml down
+
+# Reiniciar el contenedor de desarrollo
+docker-compose -f docker-compose.dev.yml restart
+
+# Ver logs del contenedor de desarrollo
+docker-compose -f docker-compose.dev.yml logs -f
+
+# Reconstruir la imagen de desarrollo
+docker-compose -f docker-compose.dev.yml build --no-cache
+```
+
+### Modo Producción
+
+```bash
+# Iniciar el contenedor en segundo plano (siempre reconstruye)
+docker-compose up -d --build
 
 # Iniciar el contenedor y ver logs
-docker-compose up
+docker-compose up --build
 
 # Detener el contenedor
 docker-compose down
@@ -54,6 +106,10 @@ docker-compose restart
 
 # Ver el estado del contenedor
 docker-compose ps
+
+# Reconstruir la imagen sin caché
+docker-compose build --no-cache
+docker-compose up -d
 ```
 
 ### Logs
@@ -205,26 +261,32 @@ cat logs/combined.log
 
 ## Desarrollo con Docker
 
-Si quieres desarrollar usando Docker pero con hot-reload:
+Para desarrollo con hot-reload automático, usa el archivo `docker-compose.dev.yml`:
 
-1. Modifica `docker-compose.yml` para montar el código como volumen:
-```yaml
-volumes:
-  - ./src:/app/src
-  - ./database:/app/database
-  - ./logs:/app/logs
-  - /app/node_modules  # Evita sobrescribir node_modules
-```
-
-2. Usa nodemon en lugar de node:
-```yaml
-command: npm run dev
-```
-
-3. Reconstruye y reinicia:
+1. **Inicia el contenedor en modo desarrollo:**
 ```bash
-docker-compose up -d --build
+docker-compose -f docker-compose.dev.yml up -d --build
 ```
+
+2. **El código se monta como volumen**, por lo que cualquier cambio en `src/` se reflejará automáticamente gracias a nodemon.
+
+3. **Ver logs en tiempo real:**
+```bash
+docker-compose -f docker-compose.dev.yml logs -f
+```
+
+4. **Para aplicar cambios en `package.json` o reconstruir:**
+```bash
+docker-compose -f docker-compose.dev.yml down
+docker-compose -f docker-compose.dev.yml up -d --build
+```
+
+**Características del modo desarrollo:**
+- ✅ Hot reload automático (nodemon)
+- ✅ Código montado como volumen
+- ✅ Base de datos persistente
+- ✅ Logs en tiempo real
+- ✅ No necesitas reconstruir para cambios en código
 
 ## Producción
 
