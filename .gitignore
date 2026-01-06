@@ -1,0 +1,11 @@
+node_modules/
+.env
+*.log
+.DS_Store
+coverage/
+*.sqlite
+*.db
+# Keep database directory structure but ignore database files
+database/*.db
+database/*.sqlite
+logs/

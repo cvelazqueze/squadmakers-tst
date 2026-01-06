@@ -1,0 +1,589 @@
+openapi: 3.0.0
+info:
+  title: SquadMakers Jokes API
+  description: REST API for managing jokes and performing mathematical operations
+  version: 1.0.0
+  contact:
+    name: SquadMakers API Support
+
+servers:
+  - url: http://localhost:3000
+    description: Development server
+
+paths:
+  /chistes:
+    get:
+      summary: Get a random joke
+      description: Returns a random joke. If source parameter is provided, fetches from specific API (Chuck or Dad).
+      parameters:
+        - name: source
+          in: path
+          required: false
+          schema:
+            type: string
+            enum: [Chuck, Dad]
+          description: Source of the joke (Chuck Norris API or Dad Jokes API)
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  joke:
+                    type: string
+                    example: "Chuck Norris can divide by zero."
+                  source:
+                    type: string
+                    example: "Chuck"
+        '400':
+          description: Invalid source parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Save a joke to database
+      description: Saves a new joke to the database. The theme will be created if it doesn't exist (upsert). The user will be created if it doesn't exist.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - text
+                - usuario
+                - tematica
+              properties:
+                text:
+                  type: string
+                  example: "Why did the chicken cross the road? To get to the other side."
+                usuario:
+                  type: string
+                  example: "Manolito"
+                  description: Name of the user creating the joke. Will be created if it doesn't exist.
+                tematica:
+                  type: string
+                  example: "humor negro"
+                  description: Theme of the joke. Will be created if it doesn't exist (upsert).
+      responses:
+        '201':
+          description: Joke saved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  text:
+                    type: string
+                    example: "Why did the chicken cross the road? To get to the other side."
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      name:
+                        type: string
+                        example: "Manolito"
+                  theme:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      name:
+                        type: string
+                        example: "humor negro"
+        '400':
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /chistes/{number}:
+    put:
+      summary: Update a joke
+      description: Updates an existing joke by its ID
+      parameters:
+        - name: number
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID of the joke to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - text
+              properties:
+                text:
+                  type: string
+                  example: "Updated joke text"
+      responses:
+        '200':
+          description: Joke updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  text:
+                    type: string
+                    example: "Updated joke text"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Joke not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: Delete a joke
+      description: Deletes a joke by its ID
+      parameters:
+        - name: number
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID of the joke to delete
+      responses:
+        '200':
+          description: Joke deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  deleted:
+                    type: boolean
+                    example: true
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Joke not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /chistes/emparejados:
+    get:
+      summary: Get paired jokes
+      description: Fetches 5 jokes from Chuck Norris API and 5 from Dad Jokes API, pairs them 1-to-1, and returns combined jokes
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    chuck:
+                      type: string
+                      example: "Chuck Norris counted to infinity. Twice."
+                    dad:
+                      type: string
+                      example: "Why did the math book look sad? Because it had too many problems."
+                    combinado:
+                      type: string
+                      example: "Chuck Norris counted to infinity. Twice. Also, why did the math book look sad? because it had too many problems."
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /matematico:
+    get:
+      summary: Mathematical operations
+      description: Performs mathematical operations. Use 'numbers' query param for LCM calculation or 'number' query param to add 1.
+      parameters:
+        - name: numbers
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Comma-separated list of integers for LCM calculation (e.g., "4,6,8")
+        - name: number
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: Integer to add 1 to
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      numbers:
+                        type: array
+                        items:
+                          type: string
+                        example: ["4", "6"]
+                      lcm:
+                        type: integer
+                        example: 12
+                  - type: object
+                    properties:
+                      number:
+                        type: integer
+                        example: 5
+                      result:
+                        type: integer
+                        example: 6
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /consultas/manolito:
+    get:
+      summary: Get all jokes by Manolito
+      description: Returns all jokes created by the user "Manolito"
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: string
+                    example: "Manolito"
+                  count:
+                    type: integer
+                    example: 9
+                  jokes:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Joke'
+
+  /consultas/humor-negro:
+    get:
+      summary: Get all jokes of theme "humor negro"
+      description: Returns all jokes with the theme "humor negro"
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  theme:
+                    type: string
+                    example: "humor negro"
+                  count:
+                    type: integer
+                    example: 12
+                  jokes:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Joke'
+
+  /consultas/manolito/humor-negro:
+    get:
+      summary: Get jokes by Manolito and theme "humor negro"
+      description: Returns all jokes created by "Manolito" with the theme "humor negro"
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: string
+                    example: "Manolito"
+                  theme:
+                    type: string
+                    example: "humor negro"
+                  count:
+                    type: integer
+                    example: 3
+                  jokes:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Joke'
+
+  /usuarios:
+    get:
+      summary: Get all users
+      description: Returns a list of all users in the database
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    example: 4
+                  users:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        name:
+                          type: string
+                          example: "Manolito"
+    post:
+      summary: Create a user
+      description: Creates a new user. If the user already exists, returns the existing user (upsert behavior).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  example: "Manolito"
+      responses:
+        '200':
+          description: User already exists
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  name:
+                    type: string
+                    example: "Manolito"
+                  created:
+                    type: boolean
+                    example: false
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 5
+                  name:
+                    type: string
+                    example: "NuevoUsuario"
+                  created:
+                    type: boolean
+                    example: true
+        '400':
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /tematicas:
+    get:
+      summary: Get all themes
+      description: Returns a list of all themes in the database
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    example: 3
+                  themes:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        name:
+                          type: string
+                          example: "humor negro"
+    post:
+      summary: Create a theme
+      description: Creates a new theme. If the theme already exists, returns the existing theme (upsert behavior).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  example: "humor negro"
+      responses:
+        '200':
+          description: Theme already exists
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  name:
+                    type: string
+                    example: "humor negro"
+                  created:
+                    type: boolean
+                    example: false
+        '201':
+          description: Theme created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 4
+                  name:
+                    type: string
+                    example: "nueva tematica"
+                  created:
+                    type: boolean
+                    example: true
+        '400':
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /health:
+    get:
+      summary: Health check
+      description: Returns the health status of the API
+      responses:
+        '200':
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+                  timestamp:
+                    type: string
+                    format: date-time
+
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Error message"
+    Joke:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        text:
+          type: string
+          example: "Chiste 1 de humor negro por Manolito"
+        created_at:
+          type: string
+          format: date-time
+        user_name:
+          type: string
+          example: "Manolito"
+        theme_name:
+          type: string
+          example: "humor negro"
